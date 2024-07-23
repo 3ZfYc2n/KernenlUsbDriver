@@ -1,0 +1,70 @@
+;
+; WebSecUsbDriver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=USBDevice
+ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider=%ManufacturerName%
+CatalogFile=WebSecUsbDriver.cat
+DriverVer=
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+WebSecUsbDriver.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
+
+[Standard.NT$ARCH$.10.0...16299]
+%WebSecUsbDriver.DeviceDesc%=WebSecUsbDriver_Device, USB\VID_152A&PID_88F2
+
+[WebSecUsbDriver_Device.NT]
+CopyFiles=File_Copy
+
+[File_Copy]
+WebSecUsbDriver.sys
+
+[WebSecUsbDriver_Device.NT.HW]
+AddReg=WebSecUsbDriver_AddReg
+
+[WebSecUsbDriver_AddReg]
+; By default, USBDevice class uses iProduct descriptor to name the device
+; Uncomment for this device to use %WebSecUsbDriver.DeviceDesc%
+;HKR,,FriendlyName,,%WebSecUsbDriver.DeviceDesc%
+
+;-------------- Service installation
+[WebSecUsbDriver_Device.NT.Services]
+AddService = WebSecUsbDriver,%SPSVCINST_ASSOCSERVICE%, WebSecUsbDriver_Service_Inst
+
+; -------------- WebSecUsbDriver driver install sections
+[WebSecUsbDriver_Service_Inst]
+DisplayName    = %WebSecUsbDriver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\WebSecUsbDriver.sys
+
+[WebSecUsbDriver_Device.NT.Wdf]
+KmdfService =  WebSecUsbDriver, WebSecUsbDriver_wdfsect
+
+[WebSecUsbDriver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="WebSec"
+DiskName = "WebSecUsbDriver Installation Disk"
+WebSecUsbDriver.DeviceDesc = "WebSecUsbDriver Device"
+WebSecUsbDriver.SVCDESC = "WebSecUsbDriver Service"
